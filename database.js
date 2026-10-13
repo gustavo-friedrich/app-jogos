@@ -1,6 +1,7 @@
-const Database = require('better-sqlite3');
+const path = require('path');
+const { DatabaseSync } = require('node:sqlite');
 
-const db = new Database('jogos.db');
+const db = new DatabaseSync(path.join(__dirname, 'jogos.db'));
 
 db.exec(`
   CREATE TABLE IF NOT EXISTS jogos (
@@ -13,19 +14,19 @@ db.exec(`
   )
 `);
 
+// Carga inicial: insere 5 jogos apenas se a tabela estiver vazia
 const { total } = db.prepare('SELECT COUNT(*) AS total FROM jogos').get();
 
 if (total === 0) {
-  const inserir = db.prepare(`
-    INSERT INTO jogos (titulo, genero, plataforma, ano, nota)
-    VALUES (?, ?, ?, ?, ?)
-  `);
-  inserir.run('The Legend of Zelda: Breath of the Wild', 'Aventura', 'Switch', 2017, 9.7);
-  inserir.run('Elden Ring', 'RPG', 'PS5', 2022, 9.5);
-  inserir.run('Minecraft', 'Sandbox', 'PC', 2011, 9.0);
-  inserir.run('Hollow Knight', 'Metroidvania', 'PC', 2017, 9.4);
-  inserir.run('God of War Ragnarök', 'Ação', 'PS5', 2022, 9.3);
-  console.log('Base de dados criada com a carga inicial de jogos.');
+  const inserir = db.prepare(
+    'INSERT INTO jogos (titulo, genero, plataforma, ano, nota) VALUES (?, ?, ?, ?, ?)'
+  );
+
+  inserir.run('The Legend of Zelda: Breath of the Wild', 'Aventura', 'Nintendo Switch', 2017, 9.7);
+  inserir.run('The Witcher 3: Wild Hunt', 'RPG', 'PC', 2015, 9.3);
+  inserir.run('Elden Ring', 'RPG', 'PlayStation 5', 2022, 9.5);
+  inserir.run('Hollow Knight', 'Metroidvania', 'PC', 2017, 8.7);
+  inserir.run('FIFA 23', 'Esporte', 'Xbox Series X', 2022, 7.4);
 }
 
 module.exports = db;
